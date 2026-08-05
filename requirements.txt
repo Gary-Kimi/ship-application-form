@@ -1,3 +1,4 @@
 streamlit
 docxtpl
 deep-translator
+starlette<0.40.0
