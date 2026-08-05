@@ -4,37 +4,41 @@ from deep_translator import GoogleTranslator
 import streamlit as st
 from docxtpl import DocxTemplate
 
-import os
-
-# 自动获取当前 app.py 所在的文件夹目录
+# 1. 动态获取当前脚本所在目录，确保在 Streamlit Cloud 云端或本地都能精准找到模板文件
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# 拼接同目录下的 Word 模板路径
 TEMPLATE_PATH = os.path.join(BASE_DIR, "船海专业申请表(1).docx")
 
+# 网页基本属性设置
 st.set_page_config(page_title="船海专业申请表填写", layout="centered")
-st.title("📄 船海专业申请表自动填写系统 (支持中文自动翻译)")
+st.title("📄 船海专业申请表自动填写系统")
 
 
-# 💡 自动翻译函数
+# 2. 自动翻译工具函数（将中文翻译为英文）
 def translate_to_en(text):
     if not text or not text.strip():
         return ""
     try:
+        # 自动识别源语言并翻译为英文
         translated = GoogleTranslator(source="auto", target="en").translate(
             text
         )
         return translated
-    except Exception as e:
+    except Exception:
+        # 如果网络波动导致翻译服务暂不可用，保底返回原文本，防止程序崩溃
         return text
 
 
+# 检查模板文件是否存在
 if not os.path.exists(TEMPLATE_PATH):
     st.error(
-        f"❌ 未找到模板文件！请检查路径：\n`{TEMPLATE_PATH}`"
+        f"❌ 未找到模板文件！请确保 `船海专业申请表(1).docx` 与 `app.py` 放在同一目录下。\n当前寻找路径：`{TEMPLATE_PATH}`"
     )
 else:
-    st.success("✅ 模板加载成功！下方允许直接输入中文，系统将自动翻译为英文：")
+    st.success(
+        "✅ 模板已成功加载！下方支持直接输入中文，系统将自动翻译并格式化为英文："
+    )
 
+    # 3. 前端输入表单界面
     with st.form("application_form"):
         st.subheader("1. 姓名信息 (Name)")
         col1, col2 = st.columns(2)
@@ -89,14 +93,15 @@ else:
 
         submitted = st.form_submit_button("🚀 自动翻译并导出 Word")
 
+    # 4. 后端提交处理逻辑
     if submitted:
         if not last_name or not first_name:
             st.warning("⚠️ 请输入完整的 Family Name 和 First Name！")
         else:
             try:
-                with st.spinner("正在自动翻译文本并生成文档..."):
+                with st.spinner("正在处理文本、自动翻译并填充 Word..."):
 
-                    # ✨ 核心改进：去除 - 和空格，强制统一为只有首字母大写（如 Yangchen）
+                    # 4.1 姓名翻译与清洗：去除 - 和空格，强制只有首字母大写（例如: 阳晨 -> Yangchen）
                     last_name_en = (
                         translate_to_en(last_name)
                         .replace("-", "")
@@ -110,15 +115,15 @@ else:
                         .capitalize()
                     )
 
-                    # 地址与城市正常翻译
+                    # 地址与城市自动翻译为英文
                     address_street_en = translate_to_en(address_street)
                     city_en = translate_to_en(city)
 
-                    # 性别勾选
+                    # 4.2 性别打勾逻辑（使用标准 Unicode 打勾符号 ✓，跨设备不会变字符 P）
                     male_check = "✓" if "Male" in sex else ""
                     female_check = "✓" if "Female" in sex else ""
 
-                    # 日期拆分
+                    # 4.3 日期补零与拆分逻辑
                     day_str = (
                         day_input.zfill(2)
                         if day_input.isdigit()
@@ -141,6 +146,7 @@ else:
                         else ("", "")
                     )
 
+                    # 年份（4位）拆分：前2位存入 year_1（如 20），后2位存入 year_2（如 02）
                     year_str = (
                         year_input.zfill(4)
                         if year_input.isdigit()
@@ -149,6 +155,7 @@ else:
                     year_1 = year_str[:2]
                     year_2 = year_str[2:]
 
+                    # 4.4 读取 Word 模板并注入数据
                     doc = DocxTemplate(TEMPLATE_PATH)
 
                     context = {
@@ -172,11 +179,12 @@ else:
 
                     doc.render(context)
 
+                    # 4.5 保存至二进制流供网页下载
                     file_stream = io.BytesIO()
                     doc.save(file_stream)
                     file_stream.seek(0)
 
-                st.success("🎉 Word 申请表生成并格式化成功！")
+                st.success("🎉 Word 申请表生成并翻译成功！")
                 st.download_button(
                     label="📥 点击下载填好的英文申请表",
                     data=file_stream,
