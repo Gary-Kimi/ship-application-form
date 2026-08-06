@@ -9,21 +9,21 @@ from docxtpl import DocxTemplate
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(BASE_DIR, "船海专业申请表(1).docx")
 
-st.set_page_config(page_title="船海专业申请表填写", layout="centered")
-st.title("📄 船海专业申请表自动填写系统")
+# ✨ 网页标题更新为：乌克兰留学申请表
+st.set_page_config(page_title="乌克兰留学申请表", layout="centered")
+st.title("📄 乌克兰留学申请表")
 
 
-# 2. 姓名转拼音函数：将中文转为拼音，去除连字符和空格，仅首字母大写 (如: 阳晨 -> Yangchen)
+# 2. 姓名转拼音函数：中文转拼音、去除 - 和空格，首字母大写
 def name_to_pinyin(text):
     if not text or not text.strip():
         return ""
-    # lazy_pinyin 自动提取汉字无声调拼音，非汉字保持原样
     py_list = lazy_pinyin(text)
     combined = "".join(py_list).replace("-", "").replace(" ", "")
     return combined.capitalize()
 
 
-# 3. 地址/城市等常规中文自动翻译函数
+# 3. 常规中文自动翻译函数
 def translate_to_en(text):
     if not text or not text.strip():
         return ""
@@ -117,7 +117,7 @@ else:
                     last_name_en = name_to_pinyin(last_name)
                     first_name_en = name_to_pinyin(first_name)
 
-                    # 2. 专业中文对应映射到指定英文
+                    # 2. 专业中文映射到指定英文
                     major_map = {
                         "机器人工程": "Automation and Robot Engineering",
                         "船舶与海洋工程": "Ships and Ocean Engineering",
