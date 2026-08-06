@@ -1,4 +1,5 @@
 streamlit
 docxtpl
 deep-translator
+pypinyin
 starlette<0.40.0
