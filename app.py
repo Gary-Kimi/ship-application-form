@@ -9,7 +9,6 @@ from docxtpl import DocxTemplate
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_PATH = os.path.join(BASE_DIR, "船海专业申请表(1).docx")
 
-# ✨ 网页标题更新为：乌克兰留学申请表
 st.set_page_config(page_title="乌克兰留学申请表", layout="centered")
 st.title("📄 乌克兰留学申请表")
 
@@ -80,10 +79,19 @@ else:
                 "Year (出生年，4位)", max_chars=4, placeholder="2002"
             )
 
-        st.subheader("3. 证件与联系地址 (Passport & Address)")
-        passport_no = st.text_input(
-            "Passport No. (护照号码)", placeholder="例: E12345678"
-        )
+        st.subheader("3. 证件、籍贯与联系地址 (Passport, Native Place & Address)")
+        col_pass, col_native = st.columns(2)
+        with col_pass:
+            passport_no = st.text_input(
+                "Passport No. (护照号码)", placeholder="例: E12345678"
+            )
+        with col_native:
+            # ✨ 新增：籍贯输入框
+            native_place = st.text_input(
+                "Native Place / Hometown (籍贯)",
+                placeholder="支持中文翻译，如: 江苏南京",
+            )
+
         address_street = st.text_input(
             "Number and street name (门牌与街道地址)",
             placeholder="支持中文翻译，如: 中山路100号",
@@ -126,9 +134,10 @@ else:
                         major_cn, "Ships and Ocean Engineering"
                     )
 
-                    # 3. 地址与城市英译
+                    # 3. 地址、城市、籍贯英译
                     address_street_en = translate_to_en(address_street)
                     city_en = translate_to_en(city)
+                    native_place_en = translate_to_en(native_place)  # ✨ 籍贯英译
 
                     # 4. 性别打勾逻辑
                     male_check = "✓" if "Male" in sex else ""
@@ -181,6 +190,7 @@ else:
                         "year_1": year_1,
                         "year_2": year_2,
                         "passport_no": passport_no,
+                        "native_place": native_place_en,  # ✨ 传入 Word 模板占位符 {{ native_place }}
                         "address_street": address_street_en,
                         "city": city_en,
                         "postal_code": postal_code,
