@@ -13,7 +13,7 @@ st.set_page_config(page_title="乌克兰留学申请表", layout="centered")
 st.title("📄 乌克兰留学申请表")
 
 
-# 2. 姓名转拼音函数：中文转拼音、去除 - 和空格，首字母大写
+# 2. 姓名转拼音函数：中文转拼音、去除 - 和空格，仅首字母大写 (如: 阳晨 -> Yangchen)
 def name_to_pinyin(text):
     if not text or not text.strip():
         return ""
@@ -86,7 +86,6 @@ else:
                 "Passport No. (护照号码)", placeholder="例: E12345678"
             )
         with col_native:
-            # ✨ 新增：籍贯输入框
             native_place = st.text_input(
                 "Native Place / Hometown (籍贯)",
                 placeholder="支持中文翻译，如: 江苏南京",
@@ -134,16 +133,18 @@ else:
                         major_cn, "Ships and Ocean Engineering"
                     )
 
-                    # 3. 地址、城市、籍贯英译
+                    # 3. 地址与城市英译
                     address_street_en = translate_to_en(address_street)
-                    city_en = translate_to_en(city)
-                    native_place_en = translate_to_en(native_place)  # ✨ 籍贯英译
+                    city_en = translate_to_en(city).title()
 
-                    # 4. 性别打勾逻辑
+                    # ✨ 4. 籍贯英译并强制每个单词首字母大写 (如: Jiangsu Nanjing)
+                    native_place_en = translate_to_en(native_place).title()
+
+                    # 5. 性别打勾逻辑
                     male_check = "✓" if "Male" in sex else ""
                     female_check = "✓" if "Female" in sex else ""
 
-                    # 5. 日期补齐与拆分
+                    # 6. 日期补齐与拆分
                     day_str = (
                         day_input.zfill(2)
                         if day_input.isdigit()
@@ -174,7 +175,7 @@ else:
                     year_1 = year_str[:2]
                     year_2 = year_str[2:]
 
-                    # 6. 读取 Word 模板并写入数据
+                    # 7. 读取 Word 模板并写入数据
                     doc = DocxTemplate(TEMPLATE_PATH)
 
                     context = {
@@ -190,7 +191,7 @@ else:
                         "year_1": year_1,
                         "year_2": year_2,
                         "passport_no": passport_no,
-                        "native_place": native_place_en,  # ✨ 传入 Word 模板占位符 {{ native_place }}
+                        "native_place": native_place_en,  # 传入处理好的籍贯
                         "address_street": address_street_en,
                         "city": city_en,
                         "postal_code": postal_code,
