@@ -96,10 +96,15 @@ else:
             placeholder="支持中文翻译，如: 中山路100号",
         )
 
-        col6, col7 = st.columns(2)
-        with col6:
+        # ✨ 修改点：增加省份输入框，并将省份、城市、邮编排为三列
+        col_prov, col_city, col_post = st.columns(3)
+        with col_prov:
+            province = st.text_input(
+                "Province / State (省/州)", placeholder="如: 江苏"
+            )
+        with col_city:
             city = st.text_input("City (城市)", placeholder="如: 南京")
-        with col7:
+        with col_post:
             postal_code = st.text_input("Postal code (邮编)")
 
         col8, col9 = st.columns(2)
@@ -133,18 +138,19 @@ else:
                         major_cn, "Ships and Ocean Engineering"
                     )
 
-                    # 3. 地址与城市英译
+                    # 3. 地址、城市、籍贯、省份英译（首字母自动大写）
                     address_street_en = translate_to_en(address_street)
                     city_en = translate_to_en(city).title()
-
-                    # ✨ 4. 籍贯英译并强制每个单词首字母大写 (如: Jiangsu Nanjing)
                     native_place_en = translate_to_en(native_place).title()
+                    province_en = translate_to_en(
+                        province
+                    ).title()  # ✨ 省份英译并大写首字母 (例: Jiangsu)
 
-                    # 5. 性别打勾逻辑
+                    # 4. 性别打勾逻辑
                     male_check = "✓" if "Male" in sex else ""
                     female_check = "✓" if "Female" in sex else ""
 
-                    # 6. 日期补齐与拆分
+                    # 5. 日期补齐与拆分
                     day_str = (
                         day_input.zfill(2)
                         if day_input.isdigit()
@@ -175,7 +181,7 @@ else:
                     year_1 = year_str[:2]
                     year_2 = year_str[2:]
 
-                    # 7. 读取 Word 模板并写入数据
+                    # 6. 读取 Word 模板并写入数据
                     doc = DocxTemplate(TEMPLATE_PATH)
 
                     context = {
@@ -191,8 +197,9 @@ else:
                         "year_1": year_1,
                         "year_2": year_2,
                         "passport_no": passport_no,
-                        "native_place": native_place_en,  # 传入处理好的籍贯
+                        "native_place": native_place_en,
                         "address_street": address_street_en,
+                        "province": province_en,  # ✨ 传入 Word 占位符 {{ province }}
                         "city": city_en,
                         "postal_code": postal_code,
                         "phone": phone,
